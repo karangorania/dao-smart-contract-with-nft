@@ -1,25 +1,57 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-const hre = require("hardhat");
+const hre = require('hardhat');
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  [proposer, executor, vote1, vote2, vote3, vote4, vote5] =
+    await ethers.getSigners();
 
-  // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const NappyNFT = await hre.ethers.getContractFactory('NappyNFT');
+  const nappyNFT = await NappyNFT.deploy();
 
-  await greeter.deployed();
+  await nappyNFT.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
+  console.log('NappyNFT deployed to:', nappyNFT.address);
+
+  const TimeLock = await hre.ethers.getContractFactory('TimeLock');
+  const timeLock = await TimeLock.deploy(
+    1,
+    [],
+    ['0x0000000000000000000000000000000000000000']
+  );
+
+  await timeLock.deployed();
+
+  console.log('TimeLock deployed to:', timeLock.address);
+
+  const Governance = await hre.ethers.getContractFactory('Governance');
+  const governance = await Governance.deploy(
+    nappyNFT.address,
+    timeLock.address
+  );
+
+  await governance.deployed();
+
+  console.log('Governance deployed to:', governance.address);
+
+  const Locker = await hre.ethers.getContractFactory('Locker');
+  const locker = await Locker.deploy();
+
+  await locker.deployed();
+
+  console.log('Locker deployed to:', locker.address);
+
+  await locker.transferOwnership(timeLock.address);
+
+  await nappyNFT.safeMint(vote1.address);
+  await nappyNFT.safeMint(vote2.address);
+  await nappyNFT.safeMint(vote3.address);
+  await nappyNFT.safeMint(vote4.address);
+
+  await nappyNFT.connect(vote1).delegate(vote1.address);
+  await nappyNFT.connect(vote2).delegate(vote2.address);
+  await nappyNFT.connect(vote3).delegate(vote3.address);
+  await nappyNFT.connect(vote4).delegate(vote4.address);
+
+  await timeLock.grantRole(await timeLock.PROPOSER_ROLE(), governance.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
