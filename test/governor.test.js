@@ -123,17 +123,45 @@ describe('Governance', () => {
     await governance.connect(vote3).castVote(propId, 1);
     await governance.connect(vote4).castVote(propId, 1);
 
-    // await network.provider.send('evm_mine');
-    // await network.provider.send('evm_mine');
-    // await network.provider.send('evm_mine');
     await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+    await network.provider.send('evm_mine');
+
     // await network.provider.send('evm_mine');
+
+    // proposer.address,
+
+    const state1 = await governance.state(propId);
+    console.log(state1);
+
+    // latest block
+    const latestBlock = await hre.ethers.provider.getBlock('latest');
+    console.log(latestBlock);
+
+    const deadline = await governance.proposalDeadline(propId);
+    console.log(deadline);
 
     await governance.queue(
       [locker.address],
       [0],
       [
-        locker.interface.encodeFunctionData('withdrawFunds', [
+        await locker.interface.encodeFunctionData('withdrawFunds', [
           owner.address,
           ethers.utils.parseUnits('1', 18),
         ]),
@@ -146,20 +174,20 @@ describe('Governance', () => {
 
     await network.provider.send('evm_mine');
 
-    // await governance.execute(
-    //   [locker.address],
-    //   [0],
-    //   [
-    //     locker.interface.encodeFunctionData('withdrawFunds', [
-    //       owner.address,
-    //       ethers.utils.parseUnits('1', 18),
-    //     ]),
-    //   ],
-    //   ethers.utils.keccak256(ethers.utils.toUtf8Bytes('Donation Demo'))
-    // );
+    await governance.execute(
+      [locker.address],
+      [0],
+      [
+        locker.interface.encodeFunctionData('withdrawFunds', [
+          owner.address,
+          ethers.utils.parseUnits('1', 18),
+        ]),
+      ],
+      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('Twitter Buy'))
+    );
     // expect(await governance.state());
 
-    // const propState1 = await governance.state(propId);
-    // console.log(propState1);
+    const propState1 = await governance.state(propId);
+    console.log(propState1);
   });
 });
